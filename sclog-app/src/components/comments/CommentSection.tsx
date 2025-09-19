@@ -1,7 +1,7 @@
 'use client';
 
 import { createClient } from '@/lib/supabase/client';
-import { useEffect, useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import CommentForm from './CommentForm';
 
 type CommentRow = {
@@ -12,11 +12,21 @@ type CommentRow = {
   created_at: string;
 };
 
-type Comment = CommentRow & {
-  authorEmail?: string | null;
+type Comment = CommentRow & { authorEmail: string | null };
+
+type ProfileRow = {
+  id: string;
+  email: string | null;
 };
 
-const mapComment = (row: CommentRow): Comment => ({ ...row });
+const enrichComment = (row: CommentRow, profileEmails: Record<string, string | null>): Comment => ({
+  id: row.id,
+  post_id: row.post_id,
+  user_id: row.user_id,
+  content: row.content,
+  created_at: row.created_at,
+  authorEmail: profileEmails[row.user_id] ?? null,
+});
 
 
 export default function CommentSection({ postId }: { postId: string }) {
@@ -24,6 +34,7 @@ export default function CommentSection({ postId }: { postId: string }) {
   const [editingCommentId, setEditingCommentId] = useState<string | null>(null);
   const [editedContent, setEditedContent] = useState<string>('');
   const [currentUserId, setCurrentUserId] = useState<string | null>(null);
+  const profileEmailsRef = useRef<Record<string, string | null>>({});
   const supabase = createClient();
 
   useEffect(() => {
@@ -33,9 +44,10 @@ export default function CommentSection({ postId }: { postId: string }) {
         error: userError,
       } = await supabase.auth.getUser();
 
-      if (userError) {
+      if (userError && userError.message !== 'Auth session missing!') {
         console.error('Error fetching auth user:', userError.message ?? userError);
       }
+
       setCurrentUserId(user?.id ?? null);
 
       const { data, error } = await supabase
@@ -49,7 +61,41 @@ export default function CommentSection({ postId }: { postId: string }) {
         return;
       }
 
-      setComments((data ?? []).map(mapComment));
+      const userIds = Array.from(
+        new Set((data ?? []).map((row) => row.user_id).filter((id): id is string => Boolean(id))),
+      );
+
+      await ensureProfileEmails(userIds);
+
+      const emails = profileEmailsRef.current;
+
+      setComments((data ?? []).map((row) => enrichComment(row, emails)));
+    };
+
+    const ensureProfileEmails = async (userIds: string[]) => {
+      const missingUserIds = userIds.filter((id) => !(id in profileEmailsRef.current));
+
+      if (missingUserIds.length === 0) {
+        return;
+      }
+
+      const { data: profiles, error } = await supabase
+        .from<ProfileRow>('profiles')
+        .select('id, email')
+        .in('id', missingUserIds);
+
+      if (error) {
+        console.error('Error fetching profiles:', error.message ?? error);
+        return;
+      }
+
+      const mergedProfiles = { ...profileEmailsRef.current };
+
+      for (const profile of profiles ?? []) {
+        mergedProfiles[profile.id] = profile.email ?? null;
+      }
+
+      profileEmailsRef.current = mergedProfiles;
     };
 
     fetchUserAndComments();
@@ -59,19 +105,32 @@ export default function CommentSection({ postId }: { postId: string }) {
       .on(
         'postgres_changes',
         { event: '*', schema: 'public', table: 'comments', filter: `post_id=eq.${postId}` },
-        (payload) => {
-          if (payload.eventType === 'INSERT') {
-            setComments((prev) => [...prev, mapComment(payload.new as CommentRow)]);
-          } else if (payload.eventType === 'UPDATE') {
-            setComments((prev) =>
-              prev.map((comment) =>
-                comment.id === (payload.new as CommentRow).id
-                  ? mapComment(payload.new as CommentRow)
-                  : comment,
-              ),
-            );
+        async (payload) => {
+          if (payload.eventType === 'INSERT' || payload.eventType === 'UPDATE') {
+            const row = payload.new as CommentRow | null;
+
+            if (!row) {
+              return;
+            }
+
+            await ensureProfileEmails([row.user_id]);
+            const emails = profileEmailsRef.current;
+
+            if (payload.eventType === 'INSERT') {
+              setComments((prev) => [...prev, enrichComment(row, emails)]);
+            } else {
+              setComments((prev) =>
+                prev.map((comment) => (comment.id === row.id ? enrichComment(row, emails) : comment)),
+              );
+            }
           } else if (payload.eventType === 'DELETE') {
-            setComments((prev) => prev.filter((comment) => comment.id !== (payload.old as CommentRow).id));
+            const row = payload.old as CommentRow | null;
+
+            if (!row) {
+              return;
+            }
+
+            setComments((prev) => prev.filter((comment) => comment.id !== row.id));
           }
         },
       )
@@ -119,11 +178,15 @@ export default function CommentSection({ postId }: { postId: string }) {
   };
 
   const formatAuthor = (comment: Comment) => {
-    if (comment.authorEmail) {
+    if (comment.authorEmail && comment.authorEmail !== comment.user_id) {
       return comment.authorEmail;
     }
 
-    return comment.user_id ?? '익명';
+    if (comment.user_id) {
+      return `�����(${comment.user_id.slice(0, 8)}��)`;
+    }
+
+    return '�͸�';
   };
 
   return (
@@ -187,6 +250,5 @@ export default function CommentSection({ postId }: { postId: string }) {
     </div>
   );
 }
-
 
 

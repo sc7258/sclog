@@ -1,6 +1,6 @@
 'use client';
 
-import Tiptap from '@/components/editor/Tiptap';
+import MarkdownEditor from '@/components/editor/MarkdownEditor';
 import { useEffect, useMemo, useState } from 'react';
 import { createClient } from '@/lib/supabase/client';
 import { useRouter } from 'next/navigation';
@@ -44,7 +44,10 @@ export default function WritePage() {
     fetchSeries();
   }, [supabase]);
 
-  const canSubmit = useMemo(() => title.trim().length > 0 && content.trim().length > 0, [title, content]);
+  const canSubmit = useMemo(
+    () => title.trim().length > 0 && content.trim().length > 0,
+    [title, content],
+  );
 
   const handleSave = async () => {
     setErrorMessage(null);
@@ -78,12 +81,20 @@ export default function WritePage() {
       finalSeriesName = selectedSeries;
     }
 
+    const markdownContent = content.trim();
+
+    if (!markdownContent) {
+      setErrorMessage('본문을 입력해 주세요.');
+      setIsSaving(false);
+      return;
+    }
+
     const { error } = await supabase
       .from('posts')
       .insert([
         {
           title: title.trim(),
-          content_markdown: content,
+          content_markdown: markdownContent,
           user_id: user.id,
           tags: tagsArray,
           is_public: isPublic,
@@ -169,7 +180,7 @@ export default function WritePage() {
           </div>
         </div>
 
-        <Tiptap content={content} onChange={setContent} />
+        <MarkdownEditor value={content} onChange={setContent} />
       </div>
 
       <div className="flex flex-col gap-4 border-t pt-4 sm:flex-row sm:items-center sm:justify-between">

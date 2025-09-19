@@ -2,13 +2,14 @@ import { createClient as createServerSupabaseClient } from '@/lib/supabase/serve
 import { notFound } from 'next/navigation';
 import CommentSection from '@/components/comments/CommentSection';
 import Link from 'next/link';
-import ReactMarkdown from 'react-markdown';
-import remarkGfm from 'remark-gfm';
 import AdUnit from '@/components/ads/AdUnit';
 import EditDeleteButtons from '@/components/posts/EditDeleteButtons';
+import MarkdownRenderer from '@/components/markdown/MarkdownRenderer';
+
 
 // Server Component
-export default async function PostPage({ params }: { params: { id: string } }) {
+export default async function PostPage({ params }: { params: Promise<{ id: string }> }) {
+  const { id } = await params;
   const supabase = await createServerSupabaseClient();
   const {
     data: { user },
@@ -17,7 +18,7 @@ export default async function PostPage({ params }: { params: { id: string } }) {
   const { data: post } = await supabase
     .from('posts')
     .select('*')
-    .eq('id', params.id)
+    .eq('id', id)
     .single();
 
   if (!post) {
@@ -28,8 +29,10 @@ export default async function PostPage({ params }: { params: { id: string } }) {
     notFound();
   }
 
+  
+
   return (
-    <div className="prose dark:prose-invert mx-auto p-4">
+    <div className="mx-auto p-4">
       <div className="flex items-center justify-between mb-4">
         <h1 className="text-3xl font-bold mb-0">{post.title}</h1>
         {user && <EditDeleteButtons post={post} user={user} />}
@@ -65,9 +68,9 @@ export default async function PostPage({ params }: { params: { id: string } }) {
       </div>
 
       <article className="mt-8">
-        <ReactMarkdown remarkPlugins={[remarkGfm]}>
-          {post.content_markdown || ''}
-        </ReactMarkdown>
+        <div className="prose dark:prose-invert">
+          <MarkdownRenderer content={post.content_markdown ?? ''} />
+        </div>
       </article>
 
       <AdUnit

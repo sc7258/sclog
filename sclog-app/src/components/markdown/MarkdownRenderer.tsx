@@ -76,19 +76,22 @@ const MARKDOWN_COMPONENTS: Components = {
       {...props}
     />
   ),
-  code: ({ inline, className, children, ...rest }) => {
-    const isInline = inline ?? false;
-    const baseClass = isInline
-      ? 'inline-block align-middle rounded bg-gray-100 px-1.5 py-0.5 text-sm font-mono text-gray-800 dark:bg-gray-700 dark:text-gray-100'
-      : 'block overflow-x-auto rounded-lg bg-gray-100 px-4 py-3 text-sm font-mono text-gray-900 shadow-inner dark:bg-gray-800 dark:text-gray-100';
-
-    return (
-      <code className={`${baseClass} ${className ?? ''}`} {...rest}>
-        {children}
-      </code>
-    );
-  },
-  pre: (props) => <pre className="my-6" {...props} />,
+  code: ({ className, children, ...rest }) => (
+    <code
+      className={`inline rounded bg-gray-100 px-1.5 py-[2px] text-[0.95em] font-mono text-gray-800 dark:bg-gray-700 dark:text-gray-100 ${className ?? ''}`}
+      {...rest}
+    >
+      {children}
+    </code>
+  ),
+  pre: ({ className, children, ...rest }) => (
+    <pre
+      className={`my-6 overflow-x-auto rounded-lg bg-gray-100 px-4 py-3 text-sm font-mono text-gray-900 shadow-inner dark:bg-gray-800 dark:text-gray-100 ${className ?? ''}`}
+      {...rest}
+    >
+      {children}
+    </pre>
+  ),
   table: (props) => (
     <div className="w-full overflow-x-auto">
       <table className="w-full table-auto border-collapse overflow-hidden rounded-lg border border-gray-200 dark:border-gray-700" {...props} />

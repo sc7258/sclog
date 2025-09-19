@@ -38,8 +38,8 @@
 
 ## 3. ✍️ 블로그 포스트 관리
 
-- [x] **마크다운 에디터 (Tiptap)**
-  - [x] `/write` 페이지 생성 및 Tiptap 에디터 컴포넌트 (`Tiptap.tsx`) 통합
+- [x] **마크다운 에디터 (@uiw/react-md-editor)**
+  - [x] `/write` 페이지에 마크다운 에디터 통합 (커스텀 래퍼 `MarkdownEditor.tsx`)
   - [x] 제목, 본문, 태그 입력 UI 구현
   - [x] 공개/비공개 설정 UI (체크박스 또는 토글)
   - [x] **시리즈 분류 기능** (선택 사항)
@@ -54,8 +54,12 @@
     - [x] 상세 페이지 (`app/posts/[id]/page.tsx`)에서 포스트 내용 렌더링
   - [x] 포스트 수정/삭제: 포스트 소유자만 수정/삭제 버튼 표시 및 기능 구현 (RLS 정책 필수)
 - [x] **콘텐츠 렌더링**
+  - [x] **마크다운 렌더링 방식 변경**: `sclog-app/src/app/posts/[id]/page.tsx`에서 `marked` 대신 `react-markdown`을 사용하여 마크다운 콘텐츠를 렌더링하도록 수정한다.
   - [x] `react-markdown`과 `remark-gfm`을 사용하여 마크다운 콘텐츠를 HTML로 렌더링
   - [x] 코드 블록, 인용구, 리스트 등 마크다운 스타일링
+  - [x] TipTap HTML 콘텐츠를 저장 전 마크다운으로 정규화하는 유틸(`sclog-app/src/utils/markdown.ts`) 추가 및 작성/수정 페이지에 적용
+  - [x] velog의 Slate ↔ Markdown 직렬화 전략을 참고해 TipTap에서도 원본 마크다운 손실 없이 읽기/쓰기 동작을 정비 (Turndown 기반 변환기 도입 및 검증)
+  - [x] `vitest` 기반 마크다운/HTML 변환 유닛 테스트 작성 (`sclog-app/src/utils/markdown.test.ts`)
 
 ## 4. 💬 댓글 기능
 
@@ -108,11 +112,10 @@
 
 ---
 
+## 8. 📝 다음 작업 메모
 
-
-
-
-
-
+- [x] `sclog-app/src/app/profile/[id]/page.tsx`의 `<img>`를 `next/image`로 교체하거나 린트 예외 여부 결정
+- [x] `sclog-app/src/lib/supabase/server.ts`에서 사용하지 않는 `error` 변수 정리
+- [ ] 새 글 작성/수정 후 Supabase `posts.content_markdown` 필드가 순수 마크다운으로 저장되는지 다시 한번 확인 (향후 QA 시 수동 검증 필요)
 
 

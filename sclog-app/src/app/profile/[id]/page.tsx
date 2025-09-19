@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from 'react';
+import Image from 'next/image';
 import { createClient } from '@/lib/supabase/client';
 
 interface UserProfilePageProps {
@@ -151,8 +152,15 @@ const UserProfilePage: React.FC<UserProfilePageProps> = ({ params }) => {
             onChange={handleImageChange}
           />
           {profileImageUrl && (
-            <div className="mt-4">
-              <img src={profileImageUrl} alt="프로필 미리보기" className="w-24 h-24 rounded-full object-cover" />
+            <div className="mt-4 h-24 w-24 overflow-hidden rounded-full">
+              <Image
+                src={profileImageUrl}
+                alt="프로필 미리보기"
+                width={96}
+                height={96}
+                className="h-24 w-24 rounded-full object-cover"
+                unoptimized
+              />
             </div>
           )}
         </div>

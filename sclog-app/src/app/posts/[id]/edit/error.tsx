@@ -1,5 +1,6 @@
 'use client';
 
+import Link from 'next/link';
 import { useEffect } from 'react';
 
 type ErrorProps = {
@@ -26,12 +27,12 @@ export default function PostEditError({ error, reset }: ErrorProps) {
         >
           다시 시도하기
         </button>
-        <a
+        <Link
           href="/"
           className="text-sm font-medium text-red-600 underline hover:text-red-700"
         >
           홈으로 이동
-        </a>
+        </Link>
       </div>
     </div>
   );

@@ -44,15 +44,12 @@ export default function AdUnit({
       return;
     }
 
-    let timeoutId: number | undefined;
     const observer = new MutationObserver(() => {
       const hasRendered = (adRef.current?.clientHeight ?? 0) > 0;
       if (hasRendered) {
         setStatus('rendered');
         observer.disconnect();
-        if (timeoutId) {
-          window.clearTimeout(timeoutId);
-        }
+        window.clearTimeout(timeoutId);
       }
     });
 
@@ -67,7 +64,7 @@ export default function AdUnit({
       return;
     }
 
-    timeoutId = window.setTimeout(() => {
+    const timeoutId = window.setTimeout(() => {
       const hasRendered = (adRef.current?.clientHeight ?? 0) > 0;
       if (!hasRendered) {
         setStatus('blocked');
@@ -77,9 +74,7 @@ export default function AdUnit({
 
     return () => {
       observer.disconnect();
-      if (timeoutId) {
-        window.clearTimeout(timeoutId);
-      }
+      window.clearTimeout(timeoutId);
     };
   }, [adClientId, adSlotId]);
 

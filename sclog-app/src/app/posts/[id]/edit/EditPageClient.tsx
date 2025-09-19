@@ -3,7 +3,8 @@
 import { useEffect, useMemo, useState } from 'react';
 import { useRouter } from 'next/navigation';
 import { createClient } from '@/lib/supabase/client';
-import Tiptap from '@/components/editor/Tiptap';
+import MarkdownEditor from '@/components/editor/MarkdownEditor';
+import { normalizeStoredContent } from '@/utils/markdown';
 
 const DEFAULT_SERIES_OPTION = 'none';
 const NEW_SERIES_OPTION = 'new';
@@ -57,7 +58,8 @@ export default function EditPageClient({ postId }: EditPageClientProps) {
 
       setPost(postData);
       setTitle(postData.title);
-      setContent(postData.content_markdown);
+      const { markdown } = normalizeStoredContent(postData.content_markdown ?? '');
+      setContent(markdown);
       setTags(postData.tags?.join(', ') ?? '');
       setIsPublic(postData.is_public);
       setSelectedSeries(postData.series_name ?? DEFAULT_SERIES_OPTION);
@@ -82,9 +84,11 @@ export default function EditPageClient({ postId }: EditPageClientProps) {
     fetchPost();
   }, [postId, supabase, router]);
 
+  const normalizedMarkdown = useMemo(() => content.trim(), [content]);
+
   const canSubmit = useMemo(
-    () => title.trim().length > 0 && content.trim().length > 0,
-    [title, content]
+    () => title.trim().length > 0 && normalizedMarkdown.length > 0,
+    [title, normalizedMarkdown]
   );
 
   const handleUpdate = async () => {
@@ -105,11 +109,19 @@ export default function EditPageClient({ postId }: EditPageClientProps) {
       finalSeriesName = selectedSeries;
     }
 
+    const markdownContent = normalizedMarkdown;
+
+    if (!markdownContent) {
+      setErrorMessage('본문을 입력해 주세요.');
+      setIsSaving(false);
+      return;
+    }
+
     const { error } = await supabase
       .from('posts')
       .update({
         title: title.trim(),
-        content_markdown: content,
+        content_markdown: markdownContent,
         tags: tagsArray,
         is_public: isPublic,
         series_name: finalSeriesName,
@@ -186,7 +198,7 @@ export default function EditPageClient({ postId }: EditPageClientProps) {
         </div>
       </div>
 
-      <Tiptap content={content} onChange={setContent} />
+      <MarkdownEditor value={content} onChange={setContent} />
 
       <div className="flex flex-col gap-2 border-t pt-4 sm:flex-row sm:items-center sm:justify-between">
         <div className="flex items-center gap-2">

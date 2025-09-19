@@ -15,7 +15,7 @@ export default function AboutPage() {
       </p>
       <h2>핵심 기능</h2>
       <ul>
-        <li>Tiptap 기반의 풍부한 마크다운 에디터와 실시간 포맷팅 툴바</li>
+        <li>마크다운 미리보기와 포맷팅을 지원하는 전용 에디터</li>
         <li>Supabase Auth를 통한 GitHub 로그인과 RLS 기반 보안</li>
         <li>댓글, 시리즈, 태그, 검색 등 콘텐츠 관리 기능</li>
         <li>Google AdSense 연동을 통한 블로그 수익화</li>
