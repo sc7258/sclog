@@ -1,5 +1,5 @@
 {
-  "name": "sclog-app",
+  "name": "sclog",
   "version": "0.1.0",
   "private": true,
   "scripts": {
@@ -45,3 +45,4 @@
     "vitest": "^3.2.4"
   }
 }
+

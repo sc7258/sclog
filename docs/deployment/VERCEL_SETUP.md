@@ -15,7 +15,7 @@
 1. [Vercel 대시보드](https://vercel.com/dashboard)에 접속하여 **Add New… → Project**를 클릭합니다.
 2. Git Provider로 GitHub를 선택하고, 현재 저장소(`sclog`)를 임포트합니다.
 3. Framework Preset은 **Next.js**가 자동으로 선택됩니다.
-4. `Root Directory`는 `sclog-app`으로 지정합니다.
+4. `Root Directory`는 기본값(`.`)으로 둡니다.
 5. Build/Output 설정은 기본값(`npm install`, `npm run build`, `npm start`)을 그대로 사용해도 됩니다.
 
 ## 3. 환경 변수 설정
@@ -52,16 +52,13 @@ on:
 jobs:
   build:
     runs-on: ubuntu-latest
-    defaults:
-      run:
-        working-directory: sclog-app
     steps:
       - uses: actions/checkout@v4
       - uses: actions/setup-node@v4
         with:
           node-version: 20
           cache: "npm"
-          cache-dependency-path: sclog-app/package-lock.json
+          cache-dependency-path: package-lock.json
       - run: npm install
       - run: npm run build
 ```
@@ -88,3 +85,4 @@ jobs:
 ---
 
 추가적인 배포 관련 메모는 `docs/deployment` 디렉터리에 정리해두세요.
+
