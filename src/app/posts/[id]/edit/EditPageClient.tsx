@@ -45,11 +45,13 @@ export default function EditPageClient({ postId }: EditPageClientProps) {
         data: { user },
       } = await supabase.auth.getUser();
 
-      const { data: postData, error } = await supabase
-        .from<PostRow>('posts')
+      const { data: postDataRaw, error } = await supabase
+        .from('posts')
         .select('*')
         .eq('id', postId)
         .single();
+
+      const postData = postDataRaw as PostRow | null;
 
       if (error || !postData || user?.id !== postData.user_id) {
         router.replace('/');
@@ -237,3 +239,4 @@ export default function EditPageClient({ postId }: EditPageClientProps) {
     </div>
   );
 }
+

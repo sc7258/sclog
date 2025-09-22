@@ -11,7 +11,7 @@ const turndown = new TurndownService({
 turndown.keep(['u']);
 
 turndown.addRule('fencedCodeBlock', {
-  filter: (node) => {
+  filter: (node: HTMLElement) => {
     if (node.nodeName !== 'PRE') {
       return false;
     }
@@ -19,7 +19,7 @@ turndown.addRule('fencedCodeBlock', {
     const firstChild = node.firstChild as HTMLElement | null;
     return Boolean(firstChild && firstChild.nodeName === 'CODE');
   },
-  replacement: (_, node) => {
+  replacement: (_: string, node: HTMLElement) => {
     const pre = node as HTMLElement;
     const codeElement = pre.firstChild as HTMLElement | null;
 
@@ -42,7 +42,7 @@ turndown.addRule('fencedCodeBlock', {
 });
 
 turndown.addRule('inlineCode', {
-  filter: (node) => {
+  filter: (node: HTMLElement) => {
     if (node.nodeName !== 'CODE') {
       return false;
     }
@@ -54,7 +54,7 @@ turndown.addRule('inlineCode', {
 
     return true;
   },
-  replacement: (content) => {
+  replacement: (content: string) => {
     const backtickCount = Math.max(1, ...Array.from(content.matchAll(/`+/g)).map((match) => match[0].length), 1);
     const ticks = '`'.repeat(backtickCount + 1);
     return `${ticks}${content}${ticks}`;
@@ -62,7 +62,7 @@ turndown.addRule('inlineCode', {
 });
 
 turndown.addRule('softBreaks', {
-  filter: (node) => node.nodeName === 'BR',
+  filter: (node: HTMLElement) => node.nodeName === 'BR',
   replacement: () => '  \n',
 });
 
@@ -111,3 +111,4 @@ export const normalizeStoredContent = (content: string): { html: string; markdow
 
   return { html: markdownToHtml(trimmed), markdown: trimmed };
 };
+

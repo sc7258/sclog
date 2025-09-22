@@ -54,7 +54,7 @@ export default async function PostPage({ params }: { params: Promise<{ id: strin
           <>
             <span>&middot;</span>
             <div className="flex flex-wrap items-center gap-2">
-              {post.tags.map((tag) => (
+              {post.tags.map((tag: string) => (
                 <span
                   key={tag}
                   className="bg-gray-100 dark:bg-gray-700 rounded px-2 py-0.5 text-xs"
@@ -87,3 +87,4 @@ export default async function PostPage({ params }: { params: Promise<{ id: strin
     </div>
   );
 }
+

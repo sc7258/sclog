@@ -3,6 +3,7 @@
 import React, { useMemo } from 'react';
 import ReactMarkdown, { Components } from 'react-markdown';
 import remarkGfm from 'remark-gfm';
+import type { PluggableList } from 'unified';
 import rehypeRaw from 'rehype-raw';
 import rehypeSanitize, { defaultSchema } from 'rehype-sanitize';
 import { htmlToMarkdown } from '@/utils/markdown';
@@ -39,7 +40,7 @@ const sanitizedSchema = {
   },
 };
 
-const MARKDOWN_REHYPE_PLUGINS = [rehypeRaw, [rehypeSanitize, sanitizedSchema]] as const;
+const MARKDOWN_REHYPE_PLUGINS: PluggableList = [rehypeRaw, [rehypeSanitize, sanitizedSchema]];
 
 const BASE_CONTAINER_CLASS =
   'text-gray-800 dark:text-gray-100 leading-relaxed';
@@ -151,3 +152,4 @@ export default function MarkdownRenderer({ content, className }: MarkdownRendere
     </div>
   );
 }
+

@@ -50,8 +50,8 @@ export default function CommentSection({ postId }: { postId: string }) {
 
       setCurrentUserId(user?.id ?? null);
 
-      const { data, error } = await supabase
-        .from<CommentRow>('comments')
+      const { data: rawData, error } = await supabase
+        .from('comments')
         .select('id, post_id, user_id, content, created_at')
         .eq('post_id', postId)
         .order('created_at', { ascending: true });
@@ -62,14 +62,14 @@ export default function CommentSection({ postId }: { postId: string }) {
       }
 
       const userIds = Array.from(
-        new Set((data ?? []).map((row) => row.user_id).filter((id): id is string => Boolean(id))),
+        new Set(((rawData as CommentRow[]) ?? []).map((row) => row.user_id).filter((id): id is string => Boolean(id))),
       );
 
       await ensureProfileEmails(userIds);
 
       const emails = profileEmailsRef.current;
 
-      setComments((data ?? []).map((row) => enrichComment(row, emails)));
+      setComments(((rawData as CommentRow[]) ?? []).map((row) => enrichComment(row, emails)));
     };
 
     const ensureProfileEmails = async (userIds: string[]) => {
@@ -79,8 +79,8 @@ export default function CommentSection({ postId }: { postId: string }) {
         return;
       }
 
-      const { data: profiles, error } = await supabase
-        .from<ProfileRow>('profiles')
+      const { data: profileRows, error } = await supabase
+        .from('profiles')
         .select('id, email')
         .in('id', missingUserIds);
 
@@ -91,7 +91,7 @@ export default function CommentSection({ postId }: { postId: string }) {
 
       const mergedProfiles = { ...profileEmailsRef.current };
 
-      for (const profile of profiles ?? []) {
+      for (const profile of (profileRows as ProfileRow[]) ?? []) {
         mergedProfiles[profile.id] = profile.email ?? null;
       }
 
@@ -250,5 +250,4 @@ export default function CommentSection({ postId }: { postId: string }) {
     </div>
   );
 }
-
 

@@ -6,7 +6,7 @@ type SearchParams = {
 };
 
 type SearchPageProps = {
-  searchParams?: SearchParams | Promise<SearchParams | undefined>;
+  searchParams?: Promise<SearchParams | undefined>;
 };
 
 type SearchResultPost = {
@@ -26,8 +26,8 @@ export default async function SearchResultsPage({ searchParams }: SearchPageProp
   let error: string | null = null;
 
   if (normalizedQuery) {
-    const { data, error: supabaseError } = await supabase
-      .from<SearchResultPost>('posts')
+    const { data: rawData, error: supabaseError } = await supabase
+      .from('posts')
       .select('id, title, content_markdown, created_at')
       .textSearch('title_content', normalizedQuery)
       .eq('is_public', true);
@@ -36,7 +36,7 @@ export default async function SearchResultsPage({ searchParams }: SearchPageProp
       console.error('Error searching posts:', supabaseError);
       error = '검색 중 오류가 발생했습니다.';
     } else {
-      posts = data ?? [];
+      posts = (rawData as SearchResultPost[]) ?? [];
     }
   }
 
@@ -65,3 +65,4 @@ export default async function SearchResultsPage({ searchParams }: SearchPageProp
     </div>
   );
 }
+
