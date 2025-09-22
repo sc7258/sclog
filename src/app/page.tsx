@@ -7,7 +7,7 @@ type HomeSearchParams = {
 };
 
 type HomeProps = {
-  searchParams?: HomeSearchParams | Promise<HomeSearchParams | undefined>;
+  searchParams?: Promise<HomeSearchParams | undefined>;
 };
 
 export default async function Home({ searchParams }: HomeProps) {
@@ -118,3 +118,4 @@ export default async function Home({ searchParams }: HomeProps) {
     </div>
   );
 }
+
